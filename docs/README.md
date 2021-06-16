@@ -40,6 +40,20 @@ Hopeless Cactus 系列第五弹！
 
 玩家的视野取决于雷达，雷达探测范围外的所有东西无法被玩家看到，玩家只能看到探测范围内的敌舰、导弹和鱼雷等
 
+### 船的属性
+
+```plain
+radar: 雷达半径
+accelerationV: 最大加速度
+accelerationA: 最大角加速度
+currentVelocity: 当前速度
+currentAngle: 当前角度
+currentGearV: 当前速度挡位 ( 值域 [-1, 4] )
+currentGearA: 当前角度挡位 ( 值域 [-2, 2] )
+currentX: 当前 x 坐标
+currentY: 当前 y 坐标
+```
+
 ## 服务端
 
 使用 Colyseus
