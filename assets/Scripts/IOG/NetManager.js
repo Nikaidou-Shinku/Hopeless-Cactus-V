@@ -9,14 +9,6 @@ cc.Class({
         players: [],
         client: null,
         room: null,
-        gamePrefab: {
-            default: null,
-            type: cc.Prefab
-        },
-        gameContainer: {
-            default: null,
-            type: cc.Node
-        },
         seed: 51,
         readyToControl: false,
         loopInterval: null,
@@ -24,21 +16,10 @@ cc.Class({
         frames: [],
         frame_inv: 0,
 
-        // foo: {
-        //     // ATTRIBUTES:
-        //     default: null,        // The default value will be used only when the component attaching
-        //                           // to a node for the first time
-        //     type: cc.SpriteFrame, // optional, default is typeof default
-        //     serializable: true,   // optional, default is true
-        // },
-        // bar: {
-        //     get () {
-        //         return this._bar;
-        //     },
-        //     set (value) {
-        //         this._bar = value;
-        //     }
-        // },
+        playerPrefab: {
+            default: null,
+            type: cc.Prefab
+        }
     },
     // LIFE-CYCLE CALLBACKS:
     onLoad () {
@@ -76,9 +57,7 @@ cc.Class({
     startGame () {
         this.readyToControl = false;
         this.players = [];
-        let gameNode = cc.instantiate(this.gamePrefab);
         this.frame_inv = 0;
-        this.gameContainer.addChild(gameNode);
         cc.game.psuse();
         this.sendToRoom(['n']);
         setInterval(this.sendCMD.bind(this), 1000 / this.serverFrameRate);

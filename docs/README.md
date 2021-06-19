@@ -60,23 +60,43 @@ currentY: 当前 y 坐标
 
 ## 通信
 
+opt 结构如下所示：
+
+```json
+{
+    "addplayer": true,
+    "currentGearV": 0,
+    "currentGearA": 0,
+    "attack": {
+        "type": 1,
+        "target": {
+            "x": 0,
+            "y": 0
+        }
+    }
+}
+```
+
 ### 客户端 向 服务端
 
 客户端向服务端发送如下 message：
 
 ```json
 [
-    "type",
-    [
-        "opt1",
-        "opt2"
-    ]
+    "a",
+    "opt"
+]
+
+[
+    "g",
+    "from_frame_index",
+    "end_frame_index"
 ]
 ```
 
-当 type 为 a 时，表明玩家进行了操作，后面为操作序列
+当 type 为 a 时，表明玩家进行了操作，后面为玩家的操作
 
-当 type 为 n 时，表明有新玩家加入了房间，向服务器请求全部操作
+当 type 为 g 时，表明玩家曾掉线或刚进入房间，向服务器请求一段操作序列
 
 ### 服务端 向 客户端
 
@@ -86,26 +106,34 @@ currentY: 当前 y 坐标
 [
     "type",
     [
+        "frame_index1",
         [
-            "frame_index1",
             [
-                "opt1",
-                "opt2"
+                "sessionId1",
+                "opt"
+            ],
+            [
+                "sessionId2",
+                "opt"
             ]
-        ],
+        ]
+    ],
+    [
+        "frame_index2",
         [
-            "frame_index2",
             [
-                "opt1",
-                "opt2"
+                "sessionId1",
+                "opt"
+            ],
+            [
+                "sessionId2",
+                "opt"
             ]
         ]
     ]
 ]
 ```
 
-当 type 为 f 时，表明服务器向玩家推送下一帧的操作序列
-
-当 type 为 n 时，表明服务器向玩家推送全部操作
-
 frame_index 为操作发生的帧序号
+
+sessionId 为进行操作的玩家会话编号
