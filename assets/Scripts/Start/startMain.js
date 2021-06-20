@@ -1,6 +1,9 @@
+var com = require('Common');
 cc.Class({
     extends: cc.Component,
     properties: {
+        ip: 'localhost',
+        port: 2567,
         infoButton: {
             default: null,
             type: cc.Node
@@ -9,33 +12,27 @@ cc.Class({
             default: null,
             type: cc.Node
         },
-        // foo: {
-        //     // ATTRIBUTES:
-        //     default: null,        // The default value will be used only when the component attaching
-        //                           // to a node for the first time
-        //     type: cc.SpriteFrame, // optional, default is typeof default
-        //     serializable: true,   // optional, default is true
-        // },
-        // bar: {
-        //     get () {
-        //         return this._bar;
-        //     },
-        //     set (value) {
-        //         this._bar = value;
-        //     }
-        // },
+        nameInputer: {
+            default: null,
+            type: cc.EditBox
+        }
     },
-    // LIFE-CYCLE CALLBACKS:
-    // onLoad () {},
-    start () {
+    onLoad () {
         this.infoButton.on('click', this.jumpInfo, this);
         this.startButton.on('click', this.jumpRooms, this);
+
+        com.client = new Colyseus.Client(`ws://${ this.ip }:${ this.port }`);
+    },
+    start () {
+        com.userid = Math.round(Math.random() * 998244353);
     },
     jumpInfo () {
         cc.director.loadScene("Info");
     },
     jumpRooms () {
+        let name = this.nameInputer.string;
+        if (name == '') return;
+        com.username = name;
         cc.director.loadScene("Rooms");
-    },
-    // update (dt) {},
+    }
 });

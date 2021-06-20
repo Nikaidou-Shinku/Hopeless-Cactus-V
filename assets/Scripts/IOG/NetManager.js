@@ -1,3 +1,4 @@
+const com = require('Common');
 cc.Class({
     extends: cc.Component,
     properties: {
@@ -6,79 +7,101 @@ cc.Class({
         roomName: 'iog_room',
         serverFrameAcc: 3,
         serverFrameRate: 20,
-        players: [],
-        client: null,
-        room: null,
         seed: 51,
-        readyToControl: false,
         loopInterval: null,
         frame_index: 0,
         frames: [],
         frame_inv: 0,
+        localPlayer: null,
 
+        gameNode: {
+            default: null,
+            type: cc.Node
+        },
+        mainCamera: {
+            default: null,
+            type: cc.Camera
+        },
         playerPrefab: {
             default: null,
             type: cc.Prefab
+        },
+        vProgress: {
+            default: null,
+            type: cc.ProgressBar
         }
     },
     // LIFE-CYCLE CALLBACKS:
     onLoad () {
-        this.client = new Colyseus.Client(`ws://${ this.ip }:${ this.port }`);
-        this.getAvailableRooms();
-    },
-    getAvailableRooms () {
+        this.players = { };
         const _this = this;
-        this.client.getAvailableRooms(this.roomName, function (rooms, err) {
-            if (err) console.error(err);
-            _this.node.emit('getAvailableRooms', {rooms: rooms});
+        com.room.onMessage('f', (message) => {
+            _this.onReceiveFrame(message);
         });
-    },
-    createRoom () {
-        this.joinRoom();
-    },
-    joinRoom () {
-        this.room = this.client.join(this.roomName);
-        this.room.onJoin.add(this.onJoinRoom.bind(this));
-        this.room.onStateChange.add(function (state) {
-            console.log('initial room state:', state);
+        com.room.onMessage('n', (message) => {
+            _this.onReceiveFrame(message);
+            _this.nextTick();
         });
-        this.room.onMessage.add(this.onMessage.bind(this));
-    },
-    onJoinRoom () {
-        this.node.emit('roomJoined', {
-            room_id: this.room.id,
-            room_session: this.room.sessionId
-        });
-        this.startGame();
-    },
-    close () {
-        this.client.close(this.client.id);
-    },
-    startGame () {
-        this.readyToControl = false;
-        this.players = [];
+        com.readyToControl = false;
         this.frame_inv = 0;
-        cc.game.psuse();
-        this.sendToRoom(['n']);
-        setInterval(this.sendCMD.bind(this), 1000 / this.serverFrameRate);
+        cc.game.pause();
+        com.room.send('n', '0');
     },
-    sendCMD() {
-
+    createPlayer (message) { // TODO: 感觉好乱，以后要重构下
+        let new_player = cc.instantiate(this.playerPrefab);
+        let new_player_script = new_player.getComponent('Boat');
+        new_player_script.sessionId = message[0];
+        new_player_script.isLocal = message[0] == com.room.sessionId;
+        if (new_player_script.isLocal)
+            this.localPlayer = new_player;
+        new_player_script.currentX = message[1];
+        new_player_script.currentY = message[2];
+        this.players[message[0]] = new_player_script;
+        new_player.parent = this.gameNode;
     },
-    onMessage (message) {
-        switch(message[0]) {
-            case 'f':
-                break;
-            case 'n':
-                break;
-            default:
-                console.log('接收到未处理的message:');
-                console.log(message);
-                break;
-        }
+    onReceiveFrame (message) {
+        const _this = this;
+        message.forEach((frame) => {
+            _this.frames[frame[0]] = frame[1];
+        });
     },
-    // start () { },
-    // update (dt) {},
+    nextTick () {
+        this.runTick();
+        let frame_delta = this.frames.length - this.frame_index;
+        if (frame_delta > 100) {
+            this.frame_inv = 0;
+        } else if (frame_delta > this.serverFrameAcc) {
+            this.frame_inv = 0;
+        } else {
+            if (!com.readyToControl) {
+                com.readyToControl = true;
+                com.room.send('n', '1');
+            } this.frame_inv = 1000 / (this.serverFrameRate * (this.serverFrameAcc - 1));
+        } setTimeout(this.nextTick.bind(this), this.frame_inv);
+    },
+    runTick () {
+        let frame = null;
+        if (this.frames.length > 1) {
+            frame = this.frames[this.frame_index];
+            if (frame === undefined)
+                frame = [];
+        } let len = frame.length;
+        let seed = frame[0];
+        for (let i = 1; i < len; ++ i) {
+            let this_opt = frame[i];
+            if (this_opt[1].addPlayer)
+                this.createPlayer([this_opt[0], this_opt[1].random_X, this_opt[1].random_Y]);
+            else this.players[this_opt[0]].updateState(this_opt[1])
+        } for (let this_player in this.players)
+            this.players[this_player].updateFrame();
+        ++ this.frame_index;
+        if (this.localPlayer) {
+            let pScript = this.localPlayer.getComponent('Boat');
+            this.mainCamera.node.x = this.localPlayer.x;
+            this.mainCamera.node.y = this.localPlayer.y;
+            this.vProgress.progress = (pScript.currentVelocity * 6 + 1) / 5;
+        } cc.game.step();
+    },
     seededRandom(max = 1, min = 0) {
         this.seed = (this.seed * 9301 + 49297) % 233280;
         let rnd = this.seed / 233280.0;

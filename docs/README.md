@@ -47,11 +47,12 @@ radar: 雷达半径
 accelerationV: 最大加速度
 accelerationA: 最大角加速度
 currentVelocity: 当前速度
-currentAngle: 当前角度
+currentAngularVelocity: 当前角速度
 currentGearV: 当前速度挡位 ( 值域 [-1, 4] )
 currentGearA: 当前角度挡位 ( 值域 [-2, 2] )
 currentX: 当前 x 坐标
 currentY: 当前 y 坐标
+currentAngle: 当前角度
 ```
 
 ## 服务端
@@ -64,7 +65,9 @@ opt 结构如下所示：
 
 ```json
 {
-    "addplayer": true,
+    "addPlayer": false,
+    "random_X": 0,
+    "random_Y": 0,
     "currentGearV": 0,
     "currentGearA": 0,
     "attack": {
@@ -82,56 +85,77 @@ opt 结构如下所示：
 客户端向服务端发送如下 message：
 
 ```json
-[
-    "a",
-    "opt"
-]
+{
+    "type": "a",
+    "content":
 
-[
-    "g",
-    "from_frame_index",
-    "end_frame_index"
-]
+    "opt"
+}
+
+{
+    "type": "g",
+    "content":
+
+    [
+        "from_frame_index",
+        "end_frame_index"
+    ]
+}
+
+{
+    "type": "n",
+    "content":
+
+    "num"
+}
 ```
 
 当 type 为 a 时，表明玩家进行了操作，后面为玩家的操作
 
-当 type 为 g 时，表明玩家曾掉线或刚进入房间，向服务器请求一段操作序列
+当 type 为 g 时，表明玩家向服务器请求一段操作序列
+
+当 type 为 n 时，表明玩家刚进入房间，当 num 为 0 时表明请求所有操作，为 1 时表明玩家已追帧完毕，请求服务器广播
 
 ### 服务端 向 客户端
 
 服务端向客户端发送如下 message：
 
 ```json
-[
-    "type",
+{
+    "type": "f/n",
+    "content":
+
     [
-        "frame_index1",
         [
+            "frame_index1",
             [
-                "sessionId1",
-                "opt"
-            ],
-            [
-                "sessionId2",
-                "opt"
+                "random_seed1",
+                [
+                    "sessionId1",
+                    "opt"
+                ],
+                [
+                    "sessionId2",
+                    "opt"
+                ]
             ]
-        ]
-    ],
-    [
-        "frame_index2",
+        ],
         [
+            "frame_index2",
             [
-                "sessionId1",
-                "opt"
-            ],
-            [
-                "sessionId2",
-                "opt"
+                "random_seed2",
+                [
+                    "sessionId1",
+                    "opt"
+                ],
+                [
+                    "sessionId2",
+                    "opt"
+                ]
             ]
         ]
     ]
-]
+}
 ```
 
 frame_index 为操作发生的帧序号

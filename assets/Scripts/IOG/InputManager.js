@@ -1,4 +1,4 @@
-const net = require('NetManager');
+const com = require('Common');
 cc.Class({
     extends: cc.Component,
     properties: { },
@@ -11,7 +11,7 @@ cc.Class({
         this.sendData = { };
     },
     sendCMD () {
-        net.room.send(['a', this.sendData]);
+        com.room.send('a', this.sendData);
         this.sendData = { };
     },
     checkGearV () {
@@ -39,6 +39,8 @@ cc.Class({
         this.sendCMD();
     },
     onKeyDown (event) {
+        if (!com.readyToControl)
+            return;
         switch (event.keyCode) {
             case cc.macro.KEY.w:
                 this.onGearV(1);

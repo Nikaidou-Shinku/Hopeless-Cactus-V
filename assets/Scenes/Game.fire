@@ -138,16 +138,24 @@
     "roomName": "iog_room",
     "serverFrameAcc": 3,
     "serverFrameRate": 20,
-    "players": [],
-    "client": null,
-    "room": null,
     "seed": 51,
     "readyToControl": false,
     "loopInterval": null,
     "frame_index": 0,
     "frames": [],
     "frame_inv": 0,
-    "playerPrefab": null,
+    "gameNode": {
+      "__id__": 4
+    },
+    "mainCamera": {
+      "__id__": 18
+    },
+    "playerPrefab": {
+      "__uuid__": "4f00872e-8568-4833-af3d-59426e26feaf"
+    },
+    "vProgress": {
+      "__id__": 12
+    },
     "_id": "df1QUETxhNB44E6Jn+eR2a"
   },
   {
