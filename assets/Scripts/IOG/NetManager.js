@@ -2,9 +2,6 @@ const com = require('Common');
 cc.Class({
     extends: cc.Component,
     properties: {
-        ip: 'localhost',
-        port: 2567,
-        roomName: 'iog_room',
         serverFrameAcc: 3,
         serverFrameRate: 20,
         seed: 51,

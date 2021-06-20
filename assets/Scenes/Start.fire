@@ -1700,8 +1700,8 @@
       "__id__": 2
     },
     "_enabled": true,
-    "ip": "localhost",
-    "port": 2567,
+    "ip": "heya.hsyer.net",
+    "port": 80,
     "infoButton": {
       "__id__": 27
     },

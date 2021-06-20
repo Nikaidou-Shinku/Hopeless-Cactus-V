@@ -2,8 +2,8 @@ var com = require('Common');
 cc.Class({
     extends: cc.Component,
     properties: {
-        ip: 'localhost',
-        port: 2567,
+        ip: 'heya.hsyer.net',
+        port: 80,
         infoButton: {
             default: null,
             type: cc.Node
